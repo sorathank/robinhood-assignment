@@ -1,0 +1,8 @@
+app:
+    env: "development"
+    port: "8080"
+
+mongodb:
+    connection: "mongodb://mongodb:27017"
+    sessionname: "mongo_session"
+    databasename: "robinhood"

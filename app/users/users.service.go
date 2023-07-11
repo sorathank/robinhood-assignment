@@ -13,23 +13,13 @@ import (
 // 	CF configs.Configuration
 // }
 
-type Login struct {
-	Username string `bson:"username"`
-	Password string `bson:"password"`
-}
-
 func ValidateUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var login Login
 		if err := c.ShouldBindJSON(&login); err != nil {
-			log.Println(err)
-			log.Println("TEST")
-
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Body"})
 			return
 		}
-
-		log.Println("TEST")
 
 		user, err := getUser(c, login.Username)
 		var errorMessage interface{} = "Username or Password is incorrect"
@@ -74,10 +64,6 @@ func CreateNewUser() gin.HandlerFunc {
 			c.JSON(http.StatusConflict, gin.H{"error": errorMessage})
 			return
 		}
-
-		log.Println("TEST")
-		log.Println(user.Username)
-		log.Println(user.Password)
 
 		hash, err := utils.HashPassword(user.Password)
 		if err != nil {

@@ -3,6 +3,11 @@ app:
     port: "8080"
 
 mongodb:
-    connection: "mongodb://mongodb:27017"
+    connection: "mongodb://localhost:27017"
     sessionname: "mongo_session"
     databasename: "robinhood"
+
+redis:
+    connection: "redis:6379"
+    sessionname: 
+        usersession: "user_session"

@@ -5,6 +5,8 @@ services:
         ports: 
             - "8080:8080"
         container_name: backend
+        volumes:
+        - ./app:/go/src/github.com/sorathank/robinhood-assignment/app
     
     mongodb:
         image: "mongo"
@@ -14,4 +16,8 @@ services:
         volumes:
         - ./mongodb/data/db/:/data/db/
         - ./mongodb/data/log/:/var/log/mongodb/
+
+    redis:
+        image: "redis:latest"
+        container_name: redis
   

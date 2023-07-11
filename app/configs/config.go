@@ -3,6 +3,7 @@ package configs
 type Configuration struct {
 	App     ApplicationConfiguration
 	MongoDb DatabaseConfiguration
+	Redis   RedisConfiguration
 }
 
 type ApplicationConfiguration struct {
@@ -12,6 +13,15 @@ type ApplicationConfiguration struct {
 
 type DatabaseConfiguration struct {
 	Connection   string
-	Sessionname  string
-	Databasename string
+	SessionName  string
+	DatabaseName string
+}
+
+type RedisConfiguration struct {
+	Connection  string
+	SessionName SessionConfiguration
+}
+
+type SessionConfiguration struct {
+	UserSession string
 }

@@ -21,7 +21,7 @@ func ValidateUser() gin.HandlerFunc {
 			return
 		}
 
-		user, err := getUser(c, login.Username)
+		user, err := getUserByUsername(c, login.Username)
 		var errorMessage interface{} = "Username or Password is incorrect"
 		if err != nil {
 			//User not found
@@ -36,7 +36,7 @@ func ValidateUser() gin.HandlerFunc {
 			return
 		}
 
-		log.Println("Login Success")
+		c.JSON(http.StatusAccepted, gin.H{"Login": "Success"})
 		createUserSession(c, login.Username)
 	}
 }
@@ -51,17 +51,21 @@ func createUserSession(c *gin.Context, username string) {
 
 func CreateNewUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var user Login
+		var user User
 		if err := c.ShouldBindJSON(&user); err != nil {
-			log.Println(err)
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c.JSON(http.StatusBadRequest, gin.H{"Create User": err.Error()})
 			return
 		}
 
-		_, err := getUser(c, user.Username)
+		_, err := getUserByUsername(c, user.Username)
 		if err == nil {
-			var errorMessage interface{} = "Duplicated Username"
-			c.JSON(http.StatusConflict, gin.H{"error": errorMessage})
+			c.JSON(http.StatusConflict, gin.H{"Create User": "Duplicated Username"})
+			return
+		}
+
+		_, err = getUserByEmail(c, user.Email)
+		if err == nil {
+			c.JSON(http.StatusConflict, gin.H{"Create User": "Duplicated Email"})
 			return
 		}
 
@@ -74,10 +78,12 @@ func CreateNewUser() gin.HandlerFunc {
 		insertErr := insertUser(c, user)
 		if insertErr != nil {
 			log.Println(err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.JSON(http.StatusInternalServerError, gin.H{"Create User": err.Error()})
 			return
 		}
 
 		log.Println("Create User Success")
+
+		c.JSON(http.StatusAccepted, gin.H{"Create User": "Success"})
 	}
 }

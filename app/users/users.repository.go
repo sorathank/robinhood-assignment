@@ -6,15 +6,13 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type User struct {
-	UserId   primitive.ObjectID `bson:"_id"`
-	Username string             `bson:"username"`
-	Password string             `bson:"password"`
-	Email    string             `bson:"email"`
+	Username string `bson:"_id"`
+	Password string `bson:"password"`
+	Email    string `bson:"email"`
 }
 
 type Login struct {
@@ -26,24 +24,33 @@ func getDB(c *gin.Context) *mongo.Database {
 	return c.MustGet("mongo_session").(*mongo.Database)
 }
 
-func getUser(c *gin.Context, username string) (Login, error) {
+func getUserByUsername(c *gin.Context, username string) (User, error) {
 	db := getDB(c)
 	collection := db.Collection("users")
 
-	var login Login
+	var user User
 	err := collection.FindOne(context.TODO(), bson.D{
-		{Key: "username", Value: username}}).Decode(&login)
+		{Key: "_id", Value: username}}).Decode(&user)
 
-	return login, err
+	return user, err
 }
 
-func insertUser(c *gin.Context, hashedUser Login) error {
+func getUserByEmail(c *gin.Context, email string) (User, error) {
 	db := getDB(c)
 	collection := db.Collection("users")
 
-	insertResult, err := collection.InsertOne(context.TODO(), bson.D{
-		{Key: "username", Value: hashedUser.Username},
-		{Key: "password", Value: hashedUser.Password}})
+	var user User
+	err := collection.FindOne(context.TODO(), bson.D{
+		{Key: "email", Value: email}}).Decode(&user)
+
+	return user, err
+}
+
+func insertUser(c *gin.Context, user User) error {
+	db := getDB(c)
+	collection := db.Collection("users")
+
+	insertResult, err := collection.InsertOne(context.TODO(), user)
 	fmt.Println("Inserted new user: ", insertResult.InsertedID)
 
 	return err

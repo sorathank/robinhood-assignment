@@ -17,21 +17,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var db = make(map[string]string)
-
-func mongoPool(cf configs.Configuration) gin.HandlerFunc {
-	clientOptions := options.Client().ApplyURI(cf.MongoDb.Connection)
-	client, err := mongo.Connect(context.TODO(), clientOptions)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return func(c *gin.Context) {
-		c.Set(cf.MongoDb.SessionName, client.Database(cf.MongoDb.DatabaseName))
-		c.Next()
-	}
-}
-
-func setupRouter() *gin.Engine {
+func initConfig() configs.Configuration {
 	var cf configs.Configuration
 	v := viper.New()
 	var configName = ""
@@ -52,63 +38,38 @@ func setupRouter() *gin.Engine {
 		panic(err)
 	}
 
+	return cf
+}
+
+func connectToMongoDB(cf configs.Configuration) *mongo.Database {
+	clientOptions := options.Client().ApplyURI(cf.MongoDb.Connection)
+	client, err := mongo.Connect(context.TODO(), clientOptions)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return client.Database(cf.MongoDb.DatabaseName)
+}
+
+func setupRouter(cf configs.Configuration, db *mongo.Database) *gin.Engine {
 	r := gin.Default()
 	store, _ := redis.NewStore(10, "tcp", cf.Redis.Connection, "", []byte("secret"))
 	sessionNames := []string{cf.Redis.SessionName.UserSession}
 	r.Use(sessions.SessionsMany(sessionNames, store))
-	r.Use(mongoPool(cf))
-	// Disable Console Color
-	// gin.DisableConsoleColor()
-	// r := gin.Default()
 
 	users.UsersRoutes(r)
-	interviews.InterviewRoutes(r, cf)
+	interviews.InterviewRoutes(r, db, cf)
 
 	// Ping test
 	r.GET("/ping", func(c *gin.Context) {
 		c.String(http.StatusOK, "pong")
 	})
 
-	// Authorized group (uses gin.BasicAuth() middleware)
-	// Same than:
-	// authorized := r.Group("/")
-	// authorized.Use(gin.BasicAuth(gin.Credentials{
-	//	  "foo":  "bar",
-	//	  "manu": "123",
-	//}))
-	authorized := r.Group("/", gin.BasicAuth(gin.Accounts{
-		"foo":  "bar", // user:foo password:bar
-		"manu": "123", // user:manu password:123
-	}))
-
-	/* example curl for /admin with basicauth header
-	   Zm9vOmJhcg== is base64("foo:bar")
-
-		curl -X POST \
-	  	http://localhost:8080/admin \
-	  	-H 'authorization: Basic Zm9vOmJhcg==' \
-	  	-H 'content-type: application/json' \
-	  	-d '{"value":"bar"}'
-	*/
-	authorized.POST("admin", func(c *gin.Context) {
-		user := c.MustGet(gin.AuthUserKey).(string)
-
-		// Parse JSON
-		var json struct {
-			Value string `json:"value" binding:"required"`
-		}
-
-		if c.Bind(&json) == nil {
-			db[user] = json.Value
-			c.JSON(http.StatusOK, gin.H{"status": "ok"})
-		}
-	})
-
 	return r
 }
 
 func main() {
-	r := setupRouter()
-	// Listen and Server in 0.0.0.0:8080
+	cf := initConfig()
+	db := connectToMongoDB(cf)
+	r := setupRouter(cf, db)
 	r.Run(":8000")
 }

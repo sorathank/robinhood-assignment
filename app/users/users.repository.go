@@ -2,9 +2,7 @@ package users
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -20,13 +18,16 @@ type Login struct {
 	Password string `bson:"password"`
 }
 
-func getDB(c *gin.Context) *mongo.Database {
-	return c.MustGet("mongo_session").(*mongo.Database)
+type UserRepository struct {
+	db *mongo.Database
 }
 
-func getUserByUsername(c *gin.Context, username string) (User, error) {
-	db := getDB(c)
-	collection := db.Collection("users")
+func NewUserRepository(db *mongo.Database) *UserRepository {
+	return &UserRepository{db: db}
+}
+
+func (ur *UserRepository) GetUserByUsername(username string) (User, error) {
+	collection := ur.db.Collection("users")
 
 	var user User
 	err := collection.FindOne(context.TODO(), bson.D{
@@ -35,9 +36,8 @@ func getUserByUsername(c *gin.Context, username string) (User, error) {
 	return user, err
 }
 
-func getUserByEmail(c *gin.Context, email string) (User, error) {
-	db := getDB(c)
-	collection := db.Collection("users")
+func (ur *UserRepository) GetUserByEmail(email string) (User, error) {
+	collection := ur.db.Collection("users")
 
 	var user User
 	err := collection.FindOne(context.TODO(), bson.D{
@@ -46,12 +46,10 @@ func getUserByEmail(c *gin.Context, email string) (User, error) {
 	return user, err
 }
 
-func insertUser(c *gin.Context, user User) error {
-	db := getDB(c)
-	collection := db.Collection("users")
+func (ur *UserRepository) InsertUser(user User) error {
+	collection := ur.db.Collection("users")
 
-	insertResult, err := collection.InsertOne(context.TODO(), user)
-	fmt.Println("Inserted new user: ", insertResult.InsertedID)
+	_, err := collection.InsertOne(context.TODO(), user)
 
 	return err
 }

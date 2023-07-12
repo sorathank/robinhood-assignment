@@ -7,13 +7,20 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/sorathank/robinhood-assignment/app/utils"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
-// type UserController struct {
-// 	CF configs.Configuration
-// }
+type UserController struct {
+	db         *mongo.Database
+	repository *UserRepository
+}
 
-func ValidateUser() gin.HandlerFunc {
+func NewUserController(db *mongo.Database) *UserController {
+	repository := NewUserRepository(db)
+	return &UserController{db: db, repository: repository}
+}
+
+func (uc *UserController) ValidateUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var login Login
 		if err := c.ShouldBindJSON(&login); err != nil {
@@ -21,7 +28,7 @@ func ValidateUser() gin.HandlerFunc {
 			return
 		}
 
-		user, err := getUserByUsername(c, login.Username)
+		user, err := uc.repository.GetUserByUsername(login.Username)
 		var errorMessage interface{} = "Username or Password is incorrect"
 		if err != nil {
 			//User not found
@@ -36,11 +43,11 @@ func ValidateUser() gin.HandlerFunc {
 			return
 		}
 
-		createUserSession(c, login.Username)
+		uc.createUserSession(c, login.Username)
 	}
 }
 
-func createUserSession(c *gin.Context, username string) {
+func (uc *UserController) createUserSession(c *gin.Context, username string) {
 	session := sessions.DefaultMany(c, "user_session")
 	session.Set("username", username)
 	session.Save()
@@ -48,7 +55,7 @@ func createUserSession(c *gin.Context, username string) {
 	c.JSON(200, gin.H{"result": "Login Success"})
 }
 
-func CreateNewUser() gin.HandlerFunc {
+func (uc *UserController) CreateNewUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var user User
 		if err := c.ShouldBindJSON(&user); err != nil {
@@ -56,13 +63,13 @@ func CreateNewUser() gin.HandlerFunc {
 			return
 		}
 
-		_, err := getUserByUsername(c, user.Username)
+		_, err := uc.repository.GetUserByUsername(user.Username)
 		if err == nil {
 			c.JSON(http.StatusConflict, gin.H{"Create User": "Duplicated Username"})
 			return
 		}
 
-		_, err = getUserByEmail(c, user.Email)
+		_, err = uc.repository.GetUserByEmail(user.Email)
 		if err == nil {
 			c.JSON(http.StatusConflict, gin.H{"Create User": "Duplicated Email"})
 			return
@@ -74,7 +81,7 @@ func CreateNewUser() gin.HandlerFunc {
 		}
 
 		user.Password = hash
-		insertErr := insertUser(c, user)
+		insertErr := uc.repository.InsertUser(user)
 		if insertErr != nil {
 			log.Println(err)
 			c.JSON(http.StatusInternalServerError, gin.H{"Create User": err.Error()})

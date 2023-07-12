@@ -56,7 +56,7 @@ func setupRouter(cf configs.Configuration, db *mongo.Database) *gin.Engine {
 	sessionNames := []string{cf.Redis.SessionName.UserSession}
 	r.Use(sessions.SessionsMany(sessionNames, store))
 
-	users.UsersRoutes(r)
+	users.UsersRoutes(r, db, cf)
 	interviews.InterviewRoutes(r, db, cf)
 
 	// Ping test

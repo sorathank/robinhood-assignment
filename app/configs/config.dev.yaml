@@ -8,6 +8,6 @@ mongodb:
     databasename: "robinhood"
 
 redis:
-    connection: "redis:6379"
+    connection: "localhost:6379"
     sessionname: 
         usersession: "user_session"

@@ -15,15 +15,15 @@ import (
 )
 
 type Interview struct {
-	Id          primitive.ObjectID `bson:"_id"`
+	Id          primitive.ObjectID `bson:"_id,omitempty"`
 	Description string             `bson:"description"`
-	User        primitive.ObjectID `bson:"user"`
-	Status      string             `bson:"status"`
+	User        string             `bson:"user"`
+	Status      Status             `bson:"status"`
 	CreatedTime time.Time          `bson:"created_time"`
 }
 
 type Comment struct {
-	Id          primitive.ObjectID `bson:"_id"`
+	Id          primitive.ObjectID `bson:"_id, omitempty"`
 	User        string             `bson:"user"`
 	InterviewId primitive.ObjectID `bson:"interview_id"`
 	Content     string             `bson:"content"`
@@ -120,6 +120,21 @@ func insertComment(c *gin.Context, createComment CreateComment) error {
 		"CreatedTime": time.Now(),
 	})
 	fmt.Println("Inserted new comment: ", insertResult.InsertedID)
+
+	return err
+}
+
+func updateInterviewStatus(c *gin.Context, status Status, interviewId string) error {
+	db := utils.GetDB(c)
+	collection := db.Collection("interviews")
+	objectId, err := primitive.ObjectIDFromHex(interviewId)
+	_, err = collection.UpdateOne(
+		c,
+		bson.M{"_id": objectId},
+		bson.D{
+			{"$set", bson.D{{"status", status}}},
+		},
+	)
 
 	return err
 }

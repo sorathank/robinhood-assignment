@@ -62,7 +62,7 @@ func setupRouter() *gin.Engine {
 	// r := gin.Default()
 
 	users.UsersRoutes(r)
-	interviews.InterviewRoutes(r)
+	interviews.InterviewRoutes(r, cf)
 
 	// Ping test
 	r.GET("/ping", func(c *gin.Context) {

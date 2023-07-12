@@ -18,6 +18,11 @@ type CreateComment struct {
 	Content     string
 }
 
+type UpdateStatus struct {
+	InterviewId primitive.ObjectID
+	Status      Status
+}
+
 func (ctr InterviewController) GetInterviewWithComment() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		interviewId := c.Param("interviewId")
@@ -106,5 +111,24 @@ func (ctr InterviewController) CreateNewComment() gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusAccepted, gin.H{"Create Comment": "Success"})
+	}
+}
+
+func (ctr InterviewController) UpdateInterviewStatus() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var updateStatus UpdateStatus
+		if err := c.ShouldBindJSON(&updateStatus); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"Update Status": "Invalid Body"})
+			return
+		}
+
+		updateErr := updateInterviewStatus(c, updateStatus.Status, updateStatus.InterviewId.String())
+		if updateErr != nil {
+			log.Println(updateErr)
+			c.JSON(http.StatusInternalServerError, gin.H{"Update Status": updateErr.Error()})
+			return
+		}
+
+		c.JSON(http.StatusAccepted, gin.H{"Update Status": "Success"})
 	}
 }

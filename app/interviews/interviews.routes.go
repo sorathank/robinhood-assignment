@@ -16,6 +16,7 @@ func InterviewRoutes(route *gin.Engine, cf configs.Configuration) {
 		interview.POST("", controller.CreateNewInterview())
 		interview.GET("/id/:interviewId", controller.GetInterviewWithComment())
 		interview.GET("/page/:page", controller.GetInterviewsByPage())
+		interview.PUT("/status", controller.UpdateInterviewStatus())
 	}
 
 	comment := route.Group("/comment")

@@ -76,7 +76,7 @@ func getInterviewsPagination(c *gin.Context, pageSize int64, pageNumber int64) (
 	findOptions.SetSkip((pageNumber - 1) * pageSize)
 	findOptions.SetLimit(pageSize)
 
-	cursor, err := collection.Find(context.TODO(), bson.M{}, findOptions)
+	cursor, err := collection.Find(context.TODO(), bson.M{"status": bson.M{"$ne": Archived}}, findOptions)
 	if err != nil {
 		log.Println(err)
 	}

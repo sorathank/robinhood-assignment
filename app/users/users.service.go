@@ -36,7 +36,6 @@ func ValidateUser() gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusAccepted, gin.H{"Login": "Success"})
 		createUserSession(c, login.Username)
 	}
 }

@@ -9,12 +9,16 @@ import (
 
 func getUserSession() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		session := sessions.DefaultMany(c, "user_session")
-		response := session.Get("username")
+		response := GetUserSessionInternal(c)
 
 		c.JSON(200, gin.H{"username": response})
 		fmt.Println(response)
 	}
+}
+
+func GetUserSessionInternal(c *gin.Context) interface{} {
+	session := sessions.DefaultMany(c, "user_session")
+	return session.Get("username")
 }
 
 func clearUserSession() gin.HandlerFunc {

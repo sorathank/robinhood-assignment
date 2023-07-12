@@ -10,6 +10,7 @@ import (
 	"github.com/gin-contrib/sessions/redis"
 	"github.com/gin-gonic/gin"
 	"github.com/sorathank/robinhood-assignment/app/configs"
+	"github.com/sorathank/robinhood-assignment/app/interviews"
 	"github.com/sorathank/robinhood-assignment/app/users"
 	"github.com/spf13/viper"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -61,21 +62,11 @@ func setupRouter() *gin.Engine {
 	// r := gin.Default()
 
 	users.UsersRoutes(r)
+	interviews.InterviewRoutes(r)
 
 	// Ping test
 	r.GET("/ping", func(c *gin.Context) {
 		c.String(http.StatusOK, "pong")
-	})
-
-	// Get user value
-	r.GET("/user/:name", func(c *gin.Context) {
-		user := c.Params.ByName("name")
-		value, ok := db[user]
-		if ok {
-			c.JSON(http.StatusOK, gin.H{"user": user, "value": value})
-		} else {
-			c.JSON(http.StatusOK, gin.H{"user": user, "status": "no value"})
-		}
 	})
 
 	// Authorized group (uses gin.BasicAuth() middleware)

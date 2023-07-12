@@ -6,11 +6,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-gonic/gin"
-	"github.com/sorathank/robinhood-assignment/app/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -39,102 +37,58 @@ const (
 	Archived   Status = "Archived"
 )
 
-func getInterviewById(c *gin.Context, interviewId string) (Interview, error) {
-	db := utils.GetDB(c)
-	collection := db.Collection("interviews")
+type InterviewRepository struct {
+	collection *mongo.Collection
+}
 
+func NewInterviewRepository(db *mongo.Database) *InterviewRepository {
+	return &InterviewRepository{
+		collection: db.Collection("interviews"),
+	}
+}
+
+func (r *InterviewRepository) FindOneByID(id string) (Interview, error) {
 	var interview Interview
-	err := collection.FindOne(context.TODO(), bson.M{"_id": interviewId}).Decode(&interview)
-
+	objectId, err := primitive.ObjectIDFromHex(id)
+	err = r.collection.FindOne(context.Background(), bson.M{"_id": objectId}).Decode(&interview)
 	return interview, err
 }
 
-func getCommentByInterviewId(c *gin.Context, interviewId string) ([]Comment, error) {
-	db := utils.GetDB(c)
-	collection := db.Collection("interviews")
-	findOptions := options.Find()
-	findOptions.SetSort(bson.D{{Key: "created_time", Value: -1}})
-	cursor, err := collection.Find(context.TODO(), bson.M{"interview_id": interviewId}, findOptions)
-	if err != nil {
-		log.Println(err)
-	}
-	defer cursor.Close(context.TODO())
-
-	var comments []Comment
-	if err := cursor.All(context.TODO(), &comments); err != nil {
-		log.Println(err)
-	}
-
-	return comments, err
-}
-
-func getInterviewsPagination(c *gin.Context, pageSize int64, pageNumber int64) ([]Interview, error) {
-	db := utils.GetDB(c)
-	collection := db.Collection("interviews")
+func (r *InterviewRepository) FindWithPagination(pageSize int64, pageNumber int64) ([]Interview, error) {
 	findOptions := options.Find()
 	findOptions.SetSort(bson.D{{Key: "created_time", Value: -1}})
 	findOptions.SetSkip((pageNumber - 1) * pageSize)
 	findOptions.SetLimit(pageSize)
 
-	cursor, err := collection.Find(context.TODO(), bson.M{"status": bson.M{"$ne": Archived}}, findOptions)
-	if err != nil {
-		log.Println(err)
-	}
-	defer cursor.Close(context.TODO())
+	cursor, err := r.collection.Find(context.Background(), bson.M{"status": bson.M{"$ne": Archived}}, findOptions)
 
 	var interviews []Interview
-	if err = cursor.All(c, &interviews); err != nil {
+	if err = cursor.All(context.Background(), &interviews); err != nil {
 		log.Println(err)
 	}
 
 	return interviews, err
 }
 
-func insertInterview(c *gin.Context, interview Interview) error {
-	db := utils.GetDB(c)
-	collection := db.Collection("interviews")
-
-	session := sessions.DefaultMany(c, "user_session")
-
-	insertResult, err := collection.InsertOne(context.TODO(), bson.M{
+func (r *InterviewRepository) Insert(interview Interview, creator string) error {
+	insertResult, err := r.collection.InsertOne(context.Background(), bson.M{
 		"Description": interview.Description,
-		"Creator":     session.Get("username"),
+		"Creator":     creator,
 		"Status":      Todo,
 		"CreatedTime": time.Now(),
 	})
 	fmt.Println("Inserted new Interview: ", insertResult.InsertedID)
-
 	return err
 }
 
-func insertComment(c *gin.Context, createComment CreateComment) error {
-	db := utils.GetDB(c)
-	collection := db.Collection("comments")
-
-	session := sessions.DefaultMany(c, "user_session")
-
-	insertResult, err := collection.InsertOne(context.TODO(), bson.M{
-		"User":        session.Get("username"),
-		"InterviewId": createComment.InterviewId,
-		"Content":     createComment.Content,
-		"CreatedTime": time.Now(),
-	})
-	fmt.Println("Inserted new comment: ", insertResult.InsertedID)
-
-	return err
-}
-
-func updateInterviewStatus(c *gin.Context, status Status, interviewId string) error {
-	db := utils.GetDB(c)
-	collection := db.Collection("interviews")
+func (r *InterviewRepository) UpdateStatus(status Status, interviewId string) error {
 	objectId, err := primitive.ObjectIDFromHex(interviewId)
-	_, err = collection.UpdateOne(
-		c,
+	_, err = r.collection.UpdateOne(
+		context.Background(),
 		bson.M{"_id": objectId},
 		bson.D{
 			{"$set", bson.D{{"status", status}}},
 		},
 	)
-
 	return err
 }

@@ -11,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sorathank/robinhood-assignment/app/configs"
 	"github.com/sorathank/robinhood-assignment/app/interviews"
+	"github.com/sorathank/robinhood-assignment/app/middleware"
 	"github.com/sorathank/robinhood-assignment/app/users"
 	"github.com/spf13/viper"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -56,8 +57,11 @@ func setupRouter(cf configs.Configuration, db *mongo.Database) *gin.Engine {
 	sessionNames := []string{cf.Redis.SessionName.UserSession}
 	r.Use(sessions.SessionsMany(sessionNames, store))
 
+	sessionManager := middleware.NewSessionManager()
+	authMiddleware := middleware.NewAuthMiddleware(sessionManager)
+
 	users.UsersRoutes(r, db, cf)
-	interviews.InterviewRoutes(r, db, cf)
+	interviews.InterviewRoutes(r, db, cf, authMiddleware)
 
 	// Ping test
 	r.GET("/ping", func(c *gin.Context) {

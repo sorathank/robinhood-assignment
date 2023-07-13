@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -75,5 +76,5 @@ func main() {
 	cf := initConfig()
 	db := connectToMongoDB(cf)
 	r := setupRouter(cf, db)
-	r.Run(":8080")
+	r.Run(fmt.Sprintf(":%s", cf.App.Port))
 }

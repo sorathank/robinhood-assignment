@@ -8,14 +8,14 @@ import (
 )
 
 type User struct {
-	Username string `bson:"_id"`
-	Password string `bson:"password"`
-	Email    string `bson:"email"`
+	Username string `bson:"_id" binding:"required"`
+	Password string `bson:"password" binding:"required"`
+	Email    string `bson:"email" binding:"required"`
 }
 
 type Login struct {
-	Username string `bson:"username"`
-	Password string `bson:"password"`
+	Username string `bson:"username" binding:"required"`
+	Password string `bson:"password" binding:"required"`
 }
 
 type UserRepository struct {

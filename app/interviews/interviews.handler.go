@@ -45,10 +45,15 @@ func (ctr *InterviewController) GetInterviewWithComment() gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"Get Interview With Comment": err.Error()})
 			return
 		}
+
 		comments, err := ctr.CommentRepo.FindByInterviewID(interviewId)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"Get Interview With Comment": err.Error()})
 			return
+		}
+
+		if comments == nil {
+			comments = []Comment{}
 		}
 
 		c.JSON(http.StatusOK, gin.H{"interview": interview, "comments": comments})

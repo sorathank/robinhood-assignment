@@ -1,0 +1,67 @@
+[
+    {
+        "_id": {
+            "$oid": "64afee9c7f1e630ad99f602d"
+        },
+        "user": "creator1",
+        "interview_id": {
+            "$oid": "64afc1feafab7c977749add5"
+        },
+        "content": " Test",
+        "created_time": {
+            "$date": "2023-07-13T12:31:24.311Z"
+        }
+    },
+    {
+        "_id": {
+            "$oid": "64afeeae7f1e630ad99f602e"
+        },
+        "interview_id": {
+            "$oid": "64afc1feafab7c977749add5"
+        },
+        "content": " Test",
+        "created_time": {
+            "$date": "2023-07-13T12:31:42.869Z"
+        },
+        "user": "creator2"
+    },
+    {
+        "_id": {
+            "$oid": "64afef137f1e630ad99f602f"
+        },
+        "created_time": {
+            "$date": "2023-07-13T12:33:23.284Z"
+        },
+        "user": "creator2",
+        "interview_id": {
+            "$oid": "64afcc9dafab7c977749add6"
+        },
+        "content": "test2"
+    },
+    {
+        "_id": {
+            "$oid": "64afef1b7f1e630ad99f6030"
+        },
+        "content": "test2",
+        "created_time": {
+            "$date": "2023-07-13T12:33:31.294Z"
+        },
+        "user": "creator1",
+        "interview_id": {
+            "$oid": "64afcc9dafab7c977749add6"
+        }
+    },
+    {
+        "_id": {
+            "$oid": "64afef1e7f1e630ad99f6031"
+        },
+        "interview_id": {
+            "$oid": "64afcc9dafab7c977749add6"
+        },
+        "content": "test1",
+        "created_time": {
+            "$date": "2023-07-13T12:33:34.341Z"
+        },
+        "user": "creator1"
+    }
+]

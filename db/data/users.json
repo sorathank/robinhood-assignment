@@ -1,0 +1,18 @@
+[
+    {
+      "_id": "creator1",
+      "password": "$2a$14$NE0AMJulWxUWwlYvC8jZzeaXRCrSrulKPikIKaVAaoB.mCOadunn6",
+      "email": "creator1@mail.com"
+    },
+    {
+      "_id": "creator2",
+      "password": "$2a$14$/Aanz/fHvJJu.40.YTYvBOAgY7xRmgmTVJyqpkn6Buzn1DzphaPu.",
+      "email": "creator2@mail.com"
+    },
+    {
+      "_id": "creator3",
+      "password": "$2a$14$Xj8W06iMM6d14xKm07mUPel4FxvndAunryvaofnpzo4vZ9tYcb26K",
+      "email": "creator3@mail.com"
+    }
+  ]
+  

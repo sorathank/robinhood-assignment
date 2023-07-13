@@ -75,6 +75,10 @@ func (ctr *InterviewController) GetInterviewsByPage() gin.HandlerFunc {
 			return
 		}
 
+		if interviews == nil {
+			interviews = []Interview{}
+		}
+
 		c.JSON(http.StatusOK, interviews)
 	}
 }

@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gin-contrib/sessions"
@@ -17,6 +18,7 @@ type authMiddleware struct {
 
 type SessionManager interface {
 	GetCurrentUsername(c *gin.Context) (string, bool)
+	CreateUserSession(c *gin.Context, username string)
 }
 
 type sessionManager struct {
@@ -26,6 +28,15 @@ func (s *sessionManager) GetCurrentUsername(c *gin.Context) (string, bool) {
 	session := sessions.Default(c)
 	username, exists := session.Get("username").(string)
 	return username, exists
+}
+
+func (s *sessionManager) CreateUserSession(c *gin.Context, username string) {
+	session := sessions.Default(c)
+	session.Set("username", username)
+	err := session.Save()
+	if err != nil {
+		log.Printf("Error saving session: %v", err)
+	}
 }
 
 func NewAuthMiddleware(sessionManager SessionManager) AuthMiddleware {

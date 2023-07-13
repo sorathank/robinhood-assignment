@@ -24,8 +24,8 @@ type CreateComment struct {
 }
 
 type UpdateStatus struct {
-	InterviewId primitive.ObjectID
-	Status      Status
+	InterviewId string `binding:"required"`
+	Status      Status `binding:"required"`
 }
 
 func NewInterviewController(db *mongo.Database, sessionManager middleware.SessionManager) *InterviewController {
@@ -146,11 +146,17 @@ func (ctr *InterviewController) UpdateInterviewStatus() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var updateStatus UpdateStatus
 		if err := c.ShouldBindJSON(&updateStatus); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"Update Status": "Invalid Body"})
+			c.JSON(http.StatusBadRequest, gin.H{"Update Status": err.Error()})
 			return
 		}
 
-		err := ctr.InterviewRepo.UpdateStatus(updateStatus.Status, updateStatus.InterviewId.String())
+		_, err := ctr.InterviewRepo.FindOneByID(updateStatus.InterviewId)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"Update Status": err.Error()})
+			return
+		}
+
+		err = ctr.InterviewRepo.UpdateStatus(updateStatus.Status, updateStatus.InterviewId)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"Update Status": err.Error()})
 			return

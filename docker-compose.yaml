@@ -9,15 +9,11 @@ services:
         - ./app:/go/src/github.com/sorathank/robinhood-assignment/app
     
     mongodb:
-        image: "mongo"
+        build: ./db
         ports:
             - "27017:27017"
         container_name: mongo
-        volumes:
-        - ./mongodb/data/db/:/data/db/
-        - ./mongodb/data/log/:/var/log/mongodb/
 
     redis:
         image: "redis:latest"
         container_name: redis
-  

@@ -75,5 +75,5 @@ func main() {
 	cf := initConfig()
 	db := connectToMongoDB(cf)
 	r := setupRouter(cf, db)
-	r.Run(":8000")
+	r.Run(":8080")
 }

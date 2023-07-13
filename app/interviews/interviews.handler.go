@@ -19,13 +19,13 @@ type InterviewController struct {
 }
 
 type CreateComment struct {
-	InterviewId primitive.ObjectID
+	InterviewId string
 	Content     string
 }
 
 type UpdateStatus struct {
 	InterviewId string `binding:"required"`
-	Status      Status `binding:"required"`
+	Status      string `binding:"required"`
 }
 
 func NewInterviewController(db *mongo.Database, sessionManager middleware.SessionManager) *InterviewController {
@@ -142,6 +142,21 @@ func (ctr *InterviewController) CreateNewComment() gin.HandlerFunc {
 	}
 }
 
+func IsValidStatus(status string) (Status, error) {
+	switch strings.ToLower(status) {
+	case "todo":
+		return Todo, nil
+	case "in progress":
+		return InProgress, nil
+	case "done":
+		return Done, nil
+	case "archived":
+		return Archived, nil
+	default:
+		return "", errors.New("invalid status")
+	}
+}
+
 func (ctr *InterviewController) UpdateInterviewStatus() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var updateStatus UpdateStatus
@@ -150,13 +165,19 @@ func (ctr *InterviewController) UpdateInterviewStatus() gin.HandlerFunc {
 			return
 		}
 
-		_, err := ctr.InterviewRepo.FindOneByID(updateStatus.InterviewId)
+		validStatus, err := IsValidStatus(updateStatus.Status)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"Update Status": err.Error()})
 			return
 		}
 
-		err = ctr.InterviewRepo.UpdateStatus(updateStatus.Status, updateStatus.InterviewId)
+		_, err = ctr.InterviewRepo.FindOneByID(updateStatus.InterviewId)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"Update Status": err.Error()})
+			return
+		}
+
+		err = ctr.InterviewRepo.UpdateStatus(validStatus, updateStatus.InterviewId)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"Update Status": err.Error()})
 			return

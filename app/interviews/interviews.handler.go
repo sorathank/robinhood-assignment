@@ -13,8 +13,9 @@ import (
 const PAGE_SIZE = 3
 
 type InterviewController struct {
-	InterviewRepo *InterviewRepository
-	CommentRepo   *CommentRepository
+	InterviewRepo  *InterviewRepository
+	CommentRepo    *CommentRepository
+	sessionManager middleware.SessionManager
 }
 
 type CreateComment struct {
@@ -27,10 +28,11 @@ type UpdateStatus struct {
 	Status      Status
 }
 
-func NewInterviewController(db *mongo.Database) *InterviewController {
+func NewInterviewController(db *mongo.Database, sessionManager middleware.SessionManager) *InterviewController {
 	return &InterviewController{
-		InterviewRepo: NewInterviewRepository(db),
-		CommentRepo:   NewCommentRepository(db),
+		InterviewRepo:  NewInterviewRepository(db),
+		CommentRepo:    NewCommentRepository(db),
+		sessionManager: sessionManager,
 	}
 }
 
@@ -80,16 +82,14 @@ func (ctr *InterviewController) CreateNewInterview() gin.HandlerFunc {
 			return
 		}
 
-		session := sessions.DefaultMany(c, "user_session")
+		username, exist := ctr.sessionManager.GetCurrentUsername(c)
 
-		if username := session.Get("username"); username == nil {
+		if !exist {
 			c.JSON(http.StatusBadRequest, gin.H{"Create Interview": "Not Sign in"})
 			return
 		}
 
-		creator := session.Get("username").(string)
-
-		err := ctr.InterviewRepo.Insert(interview, creator)
+		err := ctr.InterviewRepo.Insert(interview, username)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"Create Interview": err.Error()})
 			return

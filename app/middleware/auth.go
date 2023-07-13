@@ -25,13 +25,13 @@ type sessionManager struct {
 }
 
 func (s *sessionManager) GetCurrentUsername(c *gin.Context) (string, bool) {
-	session := sessions.Default(c)
+	session := sessions.DefaultMany(c, "user_session")
 	username, exists := session.Get("username").(string)
 	return username, exists
 }
 
 func (s *sessionManager) CreateUserSession(c *gin.Context, username string) {
-	session := sessions.Default(c)
+	session := sessions.DefaultMany(c, "user_session")
 	session.Set("username", username)
 	err := session.Save()
 	if err != nil {

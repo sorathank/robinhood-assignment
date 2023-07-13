@@ -71,11 +71,12 @@ func (r *InterviewRepository) FindWithPagination(pageSize int64, pageNumber int6
 }
 
 func (r *InterviewRepository) Insert(interview Interview, creator string) error {
+	log.Println(time.Now())
 	insertResult, err := r.collection.InsertOne(context.Background(), bson.M{
-		"Description": interview.Description,
-		"User":        creator,
-		"Status":      Todo,
-		"CreatedTime": time.Now(),
+		"description":  interview.Description,
+		"user":         creator,
+		"status":       Todo,
+		"created_time": time.Now(),
 	})
 	fmt.Println("Inserted new Interview: ", insertResult.InsertedID)
 	return err

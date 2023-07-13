@@ -34,10 +34,10 @@ func (r *CommentRepository) FindByInterviewID(interviewId string) ([]Comment, er
 }
 func (r *CommentRepository) Insert(comment Comment, user string) error {
 	insertResult, err := r.collection.InsertOne(context.Background(), bson.M{
-		"User":        user,
-		"InterviewId": comment.InterviewId,
-		"Content":     comment.Content,
-		"CreatedTime": time.Now(),
+		"user":         user,
+		"interview_id": comment.InterviewId,
+		"content":      comment.Content,
+		"created_time": time.Now(),
 	})
 	fmt.Println("Inserted new comment: ", insertResult.InsertedID)
 	return err

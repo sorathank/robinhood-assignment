@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -21,9 +22,10 @@ func NewCommentRepository(db *mongo.Database) *CommentRepository {
 	}
 }
 func (r *CommentRepository) FindByInterviewID(interviewId string) ([]Comment, error) {
+	objectId, err := primitive.ObjectIDFromHex(interviewId)
 	findOptions := options.Find()
 	findOptions.SetSort(bson.D{{Key: "created_time", Value: -1}})
-	cursor, err := r.collection.Find(context.Background(), bson.M{"interview_id": interviewId}, findOptions)
+	cursor, err := r.collection.Find(context.Background(), bson.M{"interview_id": objectId}, findOptions)
 
 	var comments []Comment
 	if err = cursor.All(context.Background(), &comments); err != nil {

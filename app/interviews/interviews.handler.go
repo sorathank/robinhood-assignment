@@ -3,8 +3,8 @@ package interviews
 import (
 	"net/http"
 
-	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/sorathank/robinhood-assignment/app/middleware"
 	"github.com/sorathank/robinhood-assignment/app/utils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -107,10 +107,23 @@ func (ctr *InterviewController) CreateNewComment() gin.HandlerFunc {
 			return
 		}
 
-		err := ctr.CommentRepo.Insert(Comment{
+		username, exist := ctr.sessionManager.GetCurrentUsername(c)
+
+		if !exist {
+			c.JSON(http.StatusBadRequest, gin.H{"Create Interview": "Not Sign in"})
+			return
+		}
+
+		_, err := ctr.InterviewRepo.FindOneByID(comment.InterviewId.String())
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"Create Comment": err.Error()})
+			return
+		}
+
+		err = ctr.CommentRepo.Insert(Comment{
 			InterviewId: comment.InterviewId,
 			Content:     comment.Content,
-		}, c.GetString("username"))
+		}, username)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"Create Comment": err.Error()})
 			return

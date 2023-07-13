@@ -82,14 +82,19 @@ Please replace PORT with the correct port number which is mentioned in the .env 
 # API Endpoints
 
 ## Create Interview
+
 **URL**: `/interview`
+
 **Method**: `POST`
+
 **Body**:
 ```json
 {
     "Description": "Test"
 }
 ```
+
+
 **Response**:
 ```json
 {
@@ -100,9 +105,13 @@ Please replace PORT with the correct port number which is mentioned in the .env 
 ## Get Interview by ID
 
 **URL**: `/interview/id/:interviewId`
- **Example**: `localhost:8080/interview/id/64afcc9dafab7c977749add6` 
- **Method**: `GET` 
- **Response**:
+
+**Example**: `localhost:8080/interview/id/64afcc9dafab7c977749add6` 
+
+**Method**: `GET` 
+
+**Response**:
+
  ```json
 {
     "comments": [
@@ -122,8 +131,11 @@ Please replace PORT with the correct port number which is mentioned in the .env 
 ## Get Interviews by Page
 
 **URL**: `/interview/page/:page` 
+
 **Example**: `localhost:8080/interview/page/1` 
+
 **Method**: `GET` 
+
 **Response**:
 ```json
 [
@@ -141,7 +153,9 @@ Please replace PORT with the correct port number which is mentioned in the .env 
 ## Update Interview Status
 
 **URL**: `/interview/status` 
+
 **Method**: `PUT` 
+
 **Body**:
 ```json
 {
@@ -166,8 +180,11 @@ OR
 ## Create Comment
 
 **URL**: `/comment` 
+
 **Method**: `POST` 
+
 **Body**:
+
 ```json
 {
     "InterviewId": "64afcc9dafab7c977749add6",
@@ -183,8 +200,11 @@ OR
 
 ## Create User
 **URL**: `/user`
+
 **Method**: `POST`
+
 **Body**:
+
 ```json
 {
     "username": "creator3",
@@ -213,7 +233,9 @@ OR
 
 ## User Login
 **URL**: `/login`
+
 **Method**: `POST`
+
 **Body**:
 ```json
 {

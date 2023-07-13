@@ -85,7 +85,7 @@ This will launch the application and its associated services. The application wi
 
   
 
-Please replace PORT with the correct port number which is mentioned in the .env file or Docker-compose configuration.
+Please replace PORT with the correct port number which is mentioned in the .env file.
 
 
 # API Endpoints

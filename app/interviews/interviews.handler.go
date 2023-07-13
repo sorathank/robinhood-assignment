@@ -124,6 +124,12 @@ func (ctr *InterviewController) CreateNewComment() gin.HandlerFunc {
 			return
 		}
 
+		// Check if Content is empty or only contains white spaces
+		if strings.TrimSpace(comment.Content) == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"Create Comment": "Content should not be empty or contain only spaces"})
+			return
+		}
+
 		interview, err := ctr.InterviewRepo.FindOneByID(comment.InterviewId)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"Create Comment": err.Error()})

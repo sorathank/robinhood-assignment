@@ -84,6 +84,10 @@ func (r *InterviewRepository) Insert(interview Interview, creator string) error 
 
 func (r *InterviewRepository) UpdateStatus(status Status, interviewId string) error {
 	objectId, err := primitive.ObjectIDFromHex(interviewId)
+	if err != nil {
+		return err
+	}
+
 	_, err = r.collection.UpdateOne(
 		context.Background(),
 		bson.M{"_id": objectId},

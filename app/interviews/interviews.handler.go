@@ -1,12 +1,13 @@
 package interviews
 
 import (
+	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sorathank/robinhood-assignment/app/middleware"
 	"github.com/sorathank/robinhood-assignment/app/utils"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -123,14 +124,14 @@ func (ctr *InterviewController) CreateNewComment() gin.HandlerFunc {
 			return
 		}
 
-		_, err := ctr.InterviewRepo.FindOneByID(comment.InterviewId.String())
+		interview, err := ctr.InterviewRepo.FindOneByID(comment.InterviewId)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"Create Comment": err.Error()})
 			return
 		}
 
 		err = ctr.CommentRepo.Insert(Comment{
-			InterviewId: comment.InterviewId,
+			InterviewId: interview.Id,
 			Content:     comment.Content,
 		}, username)
 		if err != nil {

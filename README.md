@@ -6,6 +6,15 @@
 
 Robinhood Assignment is a simple backend system for storing and fetching interview data. The system handles descriptions, creation times, usernames, a list of comments (which includes the creation time and commenter's name), and status.
 
+## Provided Data
+You can check all of the provided data in /db/data folder.
+The password of all users are same as the username for each account.
+
+Example:
+
+username: creator1
+
+password: creator1
   
 
 ## Tech Stack
